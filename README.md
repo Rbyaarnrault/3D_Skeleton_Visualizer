@@ -9,6 +9,8 @@
 > *"Le style est une caractéristique biométrique à chaque individu."*  
 > — **Caroline Larboulette**, Enseignante-Chercheuse à l'UBS de Vannes.
 
+![Application Visualizer](Visualizer.png)
+
 ## 🔬 Contexte Scientifique et Objectifs
 
 Ce dépôt s'inscrit dans le cadre d'un projet de recherche innovant à l'initiative de **Caroline Larboulette** (Université Bretagne Sud - Vannes). L'objectif de cette étude est d'analyser, de quantifier et de prouver l'unicité de la démarche humaine (Gait Analysis). 
