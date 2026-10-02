@@ -9,7 +9,7 @@
 > *"Le style est une caractéristique biométrique à chaque individu."*  
 > — **Caroline Larboulette**, Enseignante-Chercheuse à l'UBS de Vannes.
 
-![Application Visualizer](Visualizer.png)
+![Application Visualizer](screenshots/Visualizer.png)
 
 ## 🔬 Contexte Scientifique et Objectifs
 
