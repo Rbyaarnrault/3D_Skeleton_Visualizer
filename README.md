@@ -9,13 +9,13 @@
 > *"Le style est une caractéristique biométrique à chaque individu."*  
 > — **Caroline Larboulette**, Enseignante-Chercheuse à l'UBS de Vannes.
 
-![Application Visualizer](screenshots/Visualizer.png)
+![Application Visualizer](Visualizer.png)
 
 ## 🔬 Contexte Scientifique et Objectifs
 
-Ce dépôt s'inscrit dans le cadre d'un projet de recherche innovant à l'initiative de **Caroline Larboulette** (Université Bretagne Sud - Vannes). L'objectif de cette étude est d'analyser, de quantifier et de prouver l'unicité de la démarche humaine (Gait Analysis). 
+Ce dépôt s'inscrit dans le cadre d'un projet de recherche innovant à l'initiative de **Caroline Larboulette** (Université Bretagne Sud - Vannes). L'objectif de cette étude est d'analyser, de quantifier et de prouver l'unicité de style dans la démarche humaine (Gait Analysis). 
 
-Pour mener à bien cette recherche, nous avons constitué **notre propre base de données de Motion Capture (MoCap)** en utilisant du matériel de pointe **Qualisys**. L'étude complète porte sur une cohorte de 9 acteurs effectuant différents parcours de marche.
+Pour mener à bien cette recherche, nous avons constitué **notre propre base de données de Motion Capture (MoCap)**  qui s'appelle MiS en utilisant du matériel de pointe **Qualisys**. L'étude complète porte sur une une série de 9 acteurs effectuant différents parcours de marche.
 
 **Objectif final (Évolution prévue) :** Implémenter une architecture de réseaux de neurones (Deep Learning) capable d'apprendre les signatures biomécaniques de chaque style de marche afin de classifier et d'identifier avec précision les 9 acteurs de notre base de données.
 
