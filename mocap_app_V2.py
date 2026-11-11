@@ -126,30 +126,32 @@ class Descriptors:
 
     def detecter_phases_contact(self, side="Left"):
         """
-        Nouvelle détection robuste du contact (basée sur l'analyse visuelle de l'outil d'optimisation IA) :
-- Vitesse de balayage du pied très faible (< seuil)
-- Vitesse angulaire du pied très faible (< seuil, indiquant le pied à plat)
-- Hauteur proche du sol
+        Détection robuste du contact basée sur l'analyse des creux de vitesse.
+        On combine la vitesse linéaire et angulaire du pied. Les phases proches
+        de zéro indiquent que le pied est posé à plat sur le sol.
         """
-        z_foot = self.get_pos(f"{side}Foot")[:, 2]
-        z_toe = self.get_pos(f"{side}ToeBase")[:, 2]
-        z_min = np.minimum(z_foot, z_toe)
-        
+        # 1. Récupération des signaux cinématiques
         v_foot_norm = np.linalg.norm(self.calculer_vecteur_vitesse_3D_joint(f"{side}Foot"), axis=1)
         v_ang = np.abs(self.vitesse_angulaire_pied(side))
         
-        # Seuils déduits de l'observation visuelle
-        z_threshold = np.percentile(z_min, 30) # Doit être dans les 30% les plus bas
-        v_thresh = 400.0 # Vitesse de balayage sous 400 mm/s
-        w_thresh = 50.0  # Vitesse angulaire sous 50 °/s
+        # 2. Création d'un signal d'activité combiné et lissage
+        # On normalise grossièrement pour que les deux signaux aient un poids comparable
+        signal_activite = (v_foot_norm / 1000.0) + (v_ang / 100.0)
         
-        contact = np.zeros(len(z_min))
+        # Lissage fort pour éliminer le bruit et ne garder que l'enveloppe globale (pics et creux principaux)
+        window = int(0.1 * self.freq)
+        if window % 2 == 0: window += 1
+        signal_lisse = savgol_filter(signal_activite, window, 3)
         
-        for i in range(len(z_min)):
-            if z_min[i] < z_threshold and v_foot_norm[i] < v_thresh and v_ang[i] < w_thresh:
-                contact[i] = 1
-
-        # 1. Fill gaps (Filtre anti-trous : comble les petites ruptures de < 120ms)
+        # 3. Définition d'un seuil dynamique avec une limite absolue pour les T-Poses
+        seuil_activite = max(np.percentile(signal_lisse, 35), 1.5)
+        
+        # 4. Identification des phases de contact
+        contact = np.zeros(len(signal_lisse))
+        contact[signal_lisse < seuil_activite] = 1
+        
+        # 5. Nettoyage (Filtres morphologiques 1D)
+        # a. Fill gaps (Filtre anti-trous : comble les petites ruptures au milieu d'un appui, ex: le talon se lève un peu avant la pointe)
         gap_limit = int(0.120 * self.freq)
         last_one = -1
         for i in range(len(contact)):
@@ -158,7 +160,7 @@ class Descriptors:
                     contact[last_one:i] = 1
                 last_one = i
 
-        # 2. Anti-bruit (Enlève les micro-contacts fantômes < 100ms)
+        # b. Anti-bruit (Enlève les micro-contacts fantômes qui durent moins de 100ms)
         min_frames = int(0.100 * self.freq)
         cleaned = contact.copy()
         current_val, count = cleaned[0], 0
@@ -360,9 +362,9 @@ class Descriptors:
 
         graphiques = {
             "Phases de Contact Sol": {
-                "unit": "0/1", "x_label": "Temps (s)",
-                "lines": [(contact_l, "Pied Gauche", 'y', "yellow"), (contact_r, "Pied Droit", 'm', "magenta")],
-                "desc": "Graphique en créneaux montrant très précisément les instants où chaque pied est en l'air (valeur basse) ou posé sur le sol (valeur haute)."
+                "unit": "Pied G(haut)/D(bas)", "x_label": "Temps (s)",
+                "lines": [(contact_l * 1.5, "Pied Gauche", 'y', "yellow"), (contact_r, "Pied Droit", 'm', "magenta")],
+                "desc": "Graphique montrant les instants où chaque pied est posé sur le sol (valeur haute) ou en l'air (valeur basse). Le pied gauche est affiché au-dessus du droit pour plus de lisibilité."
             },
             "Aire de l'enveloppe corporelle (Quadrilatère)": {
                 "unit": "cm²", "x_label": "Temps (s)",
@@ -1261,7 +1263,7 @@ class MocapApp(QMainWindow):
                     writer.newPage()
                     y_cursor = margin
                 painter.drawText(margin, y_cursor, j_name)
-                painter.drawText(margin + col_w, y_cursor, f"{feats['Volume (cm³)']:.2f}")
+                painter.drawText(margin + col_w, y_cursor, f"{feats['Volume (cm³))']:.2f}")
                 painter.drawText(margin + 2*col_w, y_cursor, f"{feats['Surface (cm²)']:.2f}")
                 y_cursor += 60
                 
